@@ -1,0 +1,6 @@
+*.pyc
+*db.sqlite3
+.python-version
+upload_files/
+static_all/*
+log/
