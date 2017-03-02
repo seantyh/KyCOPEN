@@ -57,7 +57,7 @@ def getKeyness(query, ref_corp, database):
 # Thesaurus
 from composes.semantic_space.space import Space
 from composes.similarity.cos import CosSimilarity
-THES_PATH = '/var/www/copens/misc/thesaurus/'
+THES_PATH = '/var/local/etc/thesaurus/'
 def getThesaurus(word):
     if isinstance(word, unicode):
         word = word.encode('utf-8')
