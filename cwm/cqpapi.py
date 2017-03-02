@@ -27,12 +27,10 @@ except:
     
     dbdic = dict(DB_CHOICE)
 
-try:
-    from ajilock.lock import Cypher
-except:
-    import sys
-    sys.path.append('/var/www/copens')
-    from ajilock.lock import Cypher 
+import os, sys
+script_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(script_path, "../"))
+from ajilock.lock import Cypher
 cy = Cypher()
  
 class Cqp(object):
