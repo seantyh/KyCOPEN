@@ -10,17 +10,39 @@ from serializers import PttSerializer
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 import json
+import time
 
+def ip_throttle(ip_args):    
+    def deco_func(func):
+	def wrapper(*args, **kw):
+	    try:
+                ip_buckets = ip_args[0]
+		req = args[0]
+		if len(ip_buckets) > 10:
+		    ip_buckets = ip_buckets[1:]
+		req_ip = req.META.get("REMOTE_ADDR")
+		last_req_t = ip_buckets.get(req_ip, 0)
+		if time.time() - last_req_t < 5:                
+		    ip_buckets[req_ip] = time.time()
+		    return HttpResponse(jsonDump({"status": "too frequent"}), status = 429)
+		else:
+		    return func(*args, **kw)
+	    except Exception as ex:
+		return HttpResponse(jsonDump({"status": "rate limit exception", "msg": str(ex)}), status = 500)
+	return wrapper
+    return deco_func
+
+ip_records = []
 def jsonDump(dic):
     return json.dumps(dic, ensure_ascii=False, indent=4)
     
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def test(request):
     return HttpResponse(jsonDump({'status':'ok'}))
 
-@api_view(['GET'])
-@throttle_classes([UserRateThrottle])
+# @api_view(['GET'])
+@ip_throttle([ip_records])
 def concordance(request, query):
     return Response(query)
 #    if request.method == 'GET':
@@ -40,8 +62,7 @@ def concordance(request, query):
 from cwm.copensTools import getKeyness, getThesaurus, getSketch
 from cwm.forms import DB_CHOICE
 
-@api_view(['GET'])
-@throttle_classes([UserRateThrottle])
+@ip_throttle([ip_records])
 def keyness(request, query, tar_corp):
     database = DB_CHOICE 
     res = getKeyness(query, tar_corp, database)
@@ -52,8 +73,7 @@ def keyness(request, query, tar_corp):
 from rest_framework.pagination import PaginationSerializer
 from django.core.paginator import Paginator
 
-@api_view(['GET'])
-@throttle_classes([UserRateThrottle])
+@ip_throttle([ip_records])
 def thesaurus(request, word):    
     res = getThesaurus(word)
 
@@ -66,8 +86,9 @@ def thesaurus(request, word):
 
 
 
-@api_view(['GET'])
-@throttle_classes([UserRateThrottle])
+# @throttle_classes([UserRateThrottle])
+# @api_view(['GET'])
+@ip_throttle([ip_records])
 def sketch(request, query):
     res = getSketch(query)
 

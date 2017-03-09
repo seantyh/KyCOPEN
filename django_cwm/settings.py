@@ -54,7 +54,7 @@ INSTALLED_APPS = (
     'control_panel',
     'api',
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'django_pygments',
     'django_facebook',
     'about',
